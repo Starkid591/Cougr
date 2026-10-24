@@ -37,7 +37,7 @@ impl ChessContract {
     }
 
     /// Initialize a new chess game
-    pub fn new_game(env: Env, white: Address, black: Address) -> Result<u32, ChessError> {
+    pub fn new_game(env: Env, white: Address, black: Address) -> Result<(), ChessError> {
         if let Some(existing) = env.storage().instance().get::<_, GameState>(&GAME_KEY) {
             if existing.turn.status == GameStatus::Playing {
                 return Err(ChessError::GameInProgress);
@@ -66,7 +66,7 @@ impl ChessContract {
         };
 
         env.storage().instance().set(&GAME_KEY, &game_state);
-        Ok(0)
+        Ok(())
     }
 
     /// Submit a move with ZK proof
@@ -164,7 +164,7 @@ impl ChessContract {
     }
 
     /// Set the verification key (admin function). Requires the deploy-time admin's auth.
-    pub fn set_vk(env: Env, vk: VerificationKey) -> Result<u32, ChessError> {
+    pub fn set_vk(env: Env, vk: VerificationKey) -> Result<(), ChessError> {
         let admin: Address = env
             .storage()
             .instance()
@@ -174,6 +174,6 @@ impl ChessContract {
         admin.require_auth();
 
         env.storage().instance().set(&VK_KEY, &vk);
-        Ok(0)
+        Ok(())
     }
 }

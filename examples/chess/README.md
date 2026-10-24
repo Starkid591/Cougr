@@ -27,7 +27,7 @@ typed, byte-serializable game state.
 ## Admin model
 
 The contract has exactly one admin, fixed when the contract is deployed. The
-constructor `init(env, admin: Address)` stores the admin address in instance storage
+constructor `__constructor(env, admin: Address)` stores the admin address in instance storage
 under its own key (`ADMIN_KEY`). The admin cannot be changed after deployment - there is no
 transfer-admin or update-admin entrypoint. This is intentional: it ensures that the
 verification key used to accept move proofs is controlled by a single known party and
@@ -43,7 +43,7 @@ The contract is deployed with a constructor that records the admin:
 
 | Function | Parameters | Returns | Description |
 |---|---|---|---|
-| `init` (constructor) | `admin: Address` | - | Runs once at deploy. Stores the admin address used to gate `set_vk`. |
+| `__constructor` | `admin: Address` | - | Runs once at deploy. Stores the admin address used to gate `set_vk`. |
 | `new_game` | `white: Address`, `black: Address` | - | Initializes the standard 8x8 opening position, computes the initial `state_hash`, and sets White to move first. Refuses to overwrite a game that is still `Playing` (typed error `GameInProgress`). |
 | `submit_move` | `player: Address`, `from: u32`, `to: u32`, `proof: Bytes` | `MoveResult` | Requires `player.require_auth()`. Checks turn order and game status, verifies the supplied proof against the stored verification key and current `state_hash`, then applies the move, recomputes the hash, and switches turns. |
 | `resign` | `player: Address` | - | Marks the game `Resigned` if called by either registered player. |
@@ -90,7 +90,7 @@ instance, with no per-entry TTL management needed.
 ## Main gameplay flow
 
 1. Deployer registers the contract with the admin address as a constructor argument
-	``init(admin)``; the admin is stored once and cannot be changed thereafter.
+	`__constructor(admin)`; the admin is stored once and cannot be changed thereafter.
 2. Admin calls `set_vk(vk)` to register the Groth16 verification key matching the
 	off-chain move-validation circuit. This is the only admin-gated call; non-admin
 	callers fail authorization.
